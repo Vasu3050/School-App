@@ -17,6 +17,7 @@ import {
   ViewStyle,
   TextStyle,
   ActivityIndicator,
+  StyleProp,
 } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -49,9 +50,9 @@ interface SButtonProps {
   /** Optional icon element to render before the title */
   icon?: React.ReactNode;
   /** Override container styles */
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   /** Override text styles */
-  textStyle?: TextStyle;
+  textStyle?: StyleProp<TextStyle>;
 }
 
 export function SButton({

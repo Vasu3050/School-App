@@ -17,6 +17,7 @@ import {
   Text,
   View,
   ViewStyle,
+  TextStyle,
 } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -41,7 +42,7 @@ interface SInputProps extends Omit<TextInputProps, 'style'> {
   /** Override container styles */
   containerStyle?: ViewStyle;
   /** Override input styles */
-  inputStyle?: ViewStyle;
+  inputStyle?: TextStyle;
 }
 
 export function SInput({

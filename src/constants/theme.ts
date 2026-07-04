@@ -10,7 +10,7 @@
 
 import '@/global.css';
 
-import { Platform, TextStyle } from 'react-native';
+import { Platform, TextStyle, ViewStyle } from 'react-native';
 
 // ─── Brand Constants ──────────────────────────────────────────────────────────
 /** Exact hex values sampled from the school logo */
@@ -219,8 +219,8 @@ export const FontFamily = Platform.select({
     mono: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
   },
   default: {
-    heading: 'System',
-    body: 'System',
+    heading: 'HankenGrotesk_600SemiBold',
+    body: 'SourceSans3_400Regular',
     mono: 'monospace',
   },
 })!;
@@ -371,48 +371,69 @@ export const Radii = {
 /**
  * Warm-tinted shadows using Cocoa Brown instead of black.
  * Per DESIGN.md: rgba(74, 50, 31, 0.08) base tint.
+ * Web uses boxShadow; native uses shadow* + elevation.
  */
+function createElevation(
+  native: ViewStyle,
+  boxShadow: string
+): ViewStyle {
+  if (Platform.OS === 'web') {
+    return { boxShadow } as ViewStyle;
+  }
+  return native;
+}
+
 export const Elevation = {
-  /** Level 0 — flat on surface, no shadow */
-  none: {
-    shadowColor: 'transparent',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0,
-    shadowRadius: 0,
-    elevation: 0,
-  },
-  /** Level 1 — cards, list items: subtle 16px blur */
-  sm: {
-    shadowColor: '#4A321F',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  /** Level 1.5 — hovered / pressed cards */
-  md: {
-    shadowColor: '#4A321F',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  /** Level 2 — modals, overlays: 32px blur */
-  lg: {
-    shadowColor: '#4A321F',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 8,
-  },
-  /** Level 3 — floating action buttons, toasts */
-  xl: {
-    shadowColor: '#4A321F',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.16,
-    shadowRadius: 24,
-    elevation: 12,
-  },
+  none: createElevation(
+    {
+      shadowColor: 'transparent',
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0,
+      shadowRadius: 0,
+      elevation: 0,
+    },
+    'none'
+  ),
+  sm: createElevation(
+    {
+      shadowColor: '#4A321F',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 8,
+      elevation: 2,
+    },
+    '0 2px 8px rgba(74, 50, 31, 0.08)'
+  ),
+  md: createElevation(
+    {
+      shadowColor: '#4A321F',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 12,
+      elevation: 4,
+    },
+    '0 4px 12px rgba(74, 50, 31, 0.10)'
+  ),
+  lg: createElevation(
+    {
+      shadowColor: '#4A321F',
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.12,
+      shadowRadius: 16,
+      elevation: 8,
+    },
+    '0 8px 16px rgba(74, 50, 31, 0.12)'
+  ),
+  xl: createElevation(
+    {
+      shadowColor: '#4A321F',
+      shadowOffset: { width: 0, height: 12 },
+      shadowOpacity: 0.16,
+      shadowRadius: 24,
+      elevation: 12,
+    },
+    '0 12px 24px rgba(74, 50, 31, 0.16)'
+  ),
 } as const;
 
 // ─── Layout Constants ─────────────────────────────────────────────────────────
