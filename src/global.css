@@ -1,0 +1,50 @@
+/*
+ * Sanskriti Pre School — Global CSS
+ *
+ * Loads the design system fonts (Hanken Grotesk + Source Sans 3)
+ * and defines CSS custom properties for web rendering.
+ *
+ * These font imports are only relevant for `expo start --web`.
+ * On native (iOS/Android), fonts are loaded via expo-font or system defaults.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* ─── Typography ────────────────────────────────────── */
+  --font-heading: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Source Sans 3', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-serif: Georgia, 'Times New Roman', serif;
+
+  /* Legacy aliases for template compatibility */
+  --font-display: var(--font-heading);
+  --font-rounded: var(--font-heading);
+
+  /* ─── Brand Colors (light mode, for CSS use on web) ─── */
+  --color-primary: #745B00;
+  --color-primary-container: #F2C94C;
+  --color-secondary: #755843;
+  --color-background: #FFF8F3;
+  --color-surface: #FFF8F3;
+  --color-text: #1E1B17;
+  --color-text-secondary: #4D4635;
+  --color-card: #FFFFFF;
+  --color-card-border: #E0DCD5;
+  --color-error: #BA1A1A;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-primary: #EBC246;
+    --color-primary-container: #584400;
+    --color-secondary: #E5BFA5;
+    --color-background: #16130F;
+    --color-surface: #16130F;
+    --color-text: #E9E1DB;
+    --color-text-secondary: #D0C5AF;
+    --color-card: #23201B;
+    --color-card-border: #38352F;
+    --color-error: #FFB4AB;
+  }
+}

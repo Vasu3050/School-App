@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "Sanskriti Pre School",
+    "slug": "sanskriti-pre-school",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/school-logo.png",
+    "scheme": "sanskritipreschool",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "icon": "./assets/images/school-logo.png",
+      "bundleIdentifier": "com.sanskritipreschool.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#F2C94C",
+        "foregroundImage": "./assets/images/school-logo.png"
+      },
+      "package": "com.sanskritipreschool.app",
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/school-logo.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#F2C94C",
+          "image": "./assets/images/school-logo.png",
+          "imageWidth": 200
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}
