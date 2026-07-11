@@ -1,17 +1,30 @@
+/**
+ * Sanskriti Pre School — Login Screen
+ *
+ * iOS-style glass aesthetic. Top nav bar with the school brand and
+ * a theme toggle. Role tabs use the fixed SSegmentedControl.
+ */
+
 import React, { useState } from 'react';
-import { StyleSheet, View, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { StyleSheet, View, ScrollView, KeyboardAvoidingView, Platform, Alert, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
 import { useAuth } from '@/context/auth-context';
 import { useThemeColors } from '@/hooks/use-theme';
-import { Typography, Spacing, Radii, LogoPath, Elevation } from '@/constants/theme';
-import { SInput } from '@/components/ui/SInput';
-import { SButton } from '@/components/ui/SButton';
-import { SText } from '@/components/ui/SText';
-import { SChip } from '@/components/ui/SChip';
+import { Typography, Spacing, Radii, LogoPath } from '@/constants/theme';
+import { SInput, SButton, SText, SSegmentedControl } from '@/components/ui';
+import { ScreenShell } from '@/components/ScreenShell';
+import { ScreenHeader } from '@/components/ScreenHeader';
+import { GlassSurface } from '@/components/ui/GlassSurface';
 import { getRoleHomePath } from '@/utils/auth-routing';
+
+const ROLE_OPTIONS = [
+  { value: 'parent' as const, label: 'Parent' },
+  { value: 'teacher' as const, label: 'Teacher' },
+  { value: 'admin' as const, label: 'Admin' },
+];
 
 export default function LoginScreen() {
   const { login } = useAuth();
@@ -64,157 +77,155 @@ export default function LoginScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={[styles.container, { backgroundColor: colors.background }]}
-    >
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
+    <ScreenShell>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.flex}
       >
-        <Animated.View entering={FadeIn.duration(800)} style={styles.header}>
-          <Image source={LogoPath} style={styles.logo} contentFit="contain" />
-          <SText variant="headlineLg" style={styles.title}>
-            Sanskriti Pre School
-          </SText>
-          <SText variant="bodyMd" style={{ color: colors.textSecondary, textAlign: 'center' }}>
-            Vijayapura
-          </SText>
-        </Animated.View>
-
-        <Animated.View
-          entering={FadeInDown.duration(600).delay(200)}
-          style={[styles.formCard, { backgroundColor: colors.surfaceContainer, borderColor: colors.outlineVariant }]}
+        <ScreenHeader />
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
-          <SText variant="titleMd" style={styles.formTitle}>
-            Sign In
-          </SText>
+          <Animated.View entering={FadeIn.duration(800)} style={styles.header}>
+            <GlassSurface style={styles.logoFrame}>
+              <Image source={LogoPath} style={styles.logo} contentFit="contain" />
+            </GlassSurface>
+            <SText variant="headlineLgMobile" style={[styles.title, { color: colors.text }]}>
+              Sanskriti Pre School
+            </SText>
+            <SText variant="bodyMd" style={{ color: colors.textSecondary, textAlign: 'center' }}>
+              Vijayapura
+            </SText>
+          </Animated.View>
 
-          <SText variant="labelSm" style={{ color: colors.textSecondary, marginBottom: Spacing.sm }}>
-            Select Account Type
-          </SText>
-          <View style={styles.roleContainer}>
-            <SChip
-              label="Parent"
-              selected={role === 'parent'}
-              onPress={() => setRole('parent')}
-              style={styles.roleChip}
-            />
-            <SChip
-              label="Teacher"
-              selected={role === 'teacher'}
-              onPress={() => setRole('teacher')}
-              style={styles.roleChip}
-            />
-            <SChip
-              label="Admin"
-              selected={role === 'admin'}
-              onPress={() => setRole('admin')}
-              style={styles.roleChip}
-            />
-          </View>
-
-          <SInput
-            label="Email, Phone, or Username"
-            placeholder="Enter your registered login detail"
-            value={identifier}
-            onChangeText={(text) => {
-              setIdentifier(text);
-              if (errors.identifier) setErrors((prev) => ({ ...prev, identifier: undefined }));
-            }}
-            error={errors.identifier}
-            autoCapitalize="none"
-            containerStyle={styles.inputSpacing}
-          />
-
-          <SInput
-            label="Password"
-            placeholder="••••••••"
-            value={password}
-            onChangeText={(text) => {
-              setPassword(text);
-              if (errors.password) setErrors((prev) => ({ ...prev, password: undefined }));
-            }}
-            error={errors.password}
-            secureTextEntry
-            autoCapitalize="none"
-            containerStyle={styles.inputSpacing}
-          />
-
-          <SButton
-            title="Sign In"
-            onPress={handleLogin}
-            loading={loading}
-            style={styles.loginButton}
-          />
-
-          {role !== 'admin' && (
-            <View style={styles.registerPrompt}>
-              <SText variant="bodySm" style={{ color: colors.textSecondary }}>
-                Don't have an account?{' '}
+          <Animated.View entering={FadeInDown.duration(600).delay(200)}>
+            <GlassSurface style={styles.formCard}>
+              <SText variant="titleMd" style={[styles.formTitle, { color: colors.text }]}>
+                Sign In
               </SText>
-              <SButton
-                title="Register"
-                variant="ghost"
-                size="sm"
-                onPress={() => router.push('/(auth)/register')}
-                textStyle={[Typography.bodySm, { fontWeight: 'bold' }]}
+
+              <SText variant="labelSm" style={{ color: colors.textSecondary, marginBottom: Spacing.sm }}>
+                Account Type
+              </SText>
+              <SSegmentedControl
+                options={ROLE_OPTIONS}
+                value={role}
+                onChange={setRole}
+                style={styles.roleSelector}
               />
-            </View>
-          )}
-        </Animated.View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+
+              <SInput
+                label="Email, Phone, or Username"
+                placeholder="Enter your registered login detail"
+                value={identifier}
+                onChangeText={(text) => {
+                  setIdentifier(text);
+                  if (errors.identifier) setErrors((prev) => ({ ...prev, identifier: undefined }));
+                }}
+                error={errors.identifier}
+                autoCapitalize="none"
+                containerStyle={styles.inputSpacing}
+              />
+
+              <SInput
+                label="Password"
+                placeholder="••••••••"
+                value={password}
+                onChangeText={(text) => {
+                  setPassword(text);
+                  if (errors.password) setErrors((prev) => ({ ...prev, password: undefined }));
+                }}
+                error={errors.password}
+                secureTextEntry
+                autoCapitalize="none"
+                containerStyle={styles.inputSpacing}
+              />
+
+              <Pressable
+                onPress={() => router.push('/(auth)/forgot-password')}
+                style={styles.forgotRow}
+              >
+                <SText variant="bodySm" style={{ color: colors.primary, fontWeight: '600' }}>
+                  Forgot password?
+                </SText>
+              </Pressable>
+
+              <SButton
+                title="Sign In"
+                onPress={handleLogin}
+                loading={loading}
+                style={styles.loginButton}
+              />
+
+              {role !== 'admin' && (
+                <View style={styles.registerPrompt}>
+                  <SText variant="bodySm" style={{ color: colors.textSecondary }}>
+                    Don't have an account?{' '}
+                  </SText>
+                  <SButton
+                    title="Register"
+                    variant="ghost"
+                    size="sm"
+                    onPress={() => router.push('/(auth)/register')}
+                    textStyle={[Typography.bodySm, { fontWeight: 'bold' }]}
+                  />
+                </View>
+              )}
+            </GlassSurface>
+          </Animated.View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </ScreenShell>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  flex: { flex: 1 },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
     padding: Spacing.xl,
+    paddingTop: Spacing.md,
   },
   header: {
     alignItems: 'center',
-    marginBottom: Spacing['3xl'],
+    marginBottom: Spacing['2xl'],
+  },
+  logoFrame: {
+    padding: Spacing.md,
+    borderRadius: Radii['2xl'],
+    marginBottom: Spacing.md,
   },
   logo: {
-    width: 100,
-    height: 100,
-    marginBottom: Spacing.md,
+    width: 88,
+    height: 88,
   },
   title: {
     textAlign: 'center',
     fontWeight: '700',
   },
   formCard: {
-    borderRadius: Radii.lg,
-    borderWidth: 1,
     padding: Spacing.xl,
-    ...Elevation.sm,
+    borderRadius: Radii['2xl'],
   },
   formTitle: {
     fontWeight: '600',
     marginBottom: Spacing.xl,
   },
-  roleContainer: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
+  roleSelector: {
     marginBottom: Spacing.xl,
-  },
-  roleChip: {
-    flex: 1,
-    alignItems: 'center',
   },
   inputSpacing: {
     marginBottom: Spacing.lg,
   },
+  forgotRow: {
+    alignSelf: 'flex-end',
+    marginBottom: Spacing.md,
+    marginTop: -Spacing.sm,
+  },
   loginButton: {
-    marginTop: Spacing.md,
     width: '100%',
   },
   registerPrompt: {

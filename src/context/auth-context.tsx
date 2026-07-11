@@ -37,6 +37,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
   resetPassword: (oldPassword: string, newPassword: string) => Promise<void>;
+  forgotPassword: (email: string, phone: string, newPassword: string) => Promise<void>;
   updateProfile: (fields: { name?: string; phone?: string }) => Promise<void>;
 }
 
@@ -143,6 +144,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const forgotPassword = async (email: string, phone: string, newPassword: string) => {
+    await apiRequest('/users/forgot-password', {
+      method: 'PATCH',
+      body: JSON.stringify({
+        email: email.trim().toLowerCase(),
+        phone: phone.trim(),
+        newPassword,
+      }),
+    });
+  };
+
   const updateProfile = async (fields: { name?: string; phone?: string }) => {
     await apiRequest('/users/update-user', {
       method: 'PATCH',
@@ -166,6 +178,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logout,
         checkAuth,
         resetPassword,
+        forgotPassword,
         updateProfile,
       }}
     >

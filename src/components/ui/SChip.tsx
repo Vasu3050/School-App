@@ -1,11 +1,7 @@
 /**
  * Sanskriti Pre School — SChip Component
  *
- * Branded chip/tag per DESIGN.md:
- *  - Used for grade levels (Pre-K, Nursery, etc.)
- *  - Light tint of Primary Yellow background
- *  - Deep Cocoa Brown text
- *  - Pill shape for tags, rounded for filters
+ * Branded chip/tag per DESIGN.md — fixed contrast for selected/unselected states.
  */
 
 import React from 'react';
@@ -20,15 +16,10 @@ import { useThemeColors } from '@/hooks/use-theme';
 import { Typography, Spacing, Radii } from '@/constants/theme';
 
 interface SChipProps {
-  /** Chip label */
   label: string;
-  /** Chip is currently selected */
   selected?: boolean;
-  /** Press handler (if interactive) */
   onPress?: () => void;
-  /** Override container styles */
   style?: ViewStyle;
-  /** Variant — pill for tags, rounded for filter chips */
   variant?: 'pill' | 'rounded';
 }
 
@@ -42,19 +33,19 @@ export function SChip({
   const colors = useThemeColors();
 
   const containerStyle: ViewStyle = {
-    backgroundColor: selected ? colors.primaryContainer : colors.primaryFixed,
+    backgroundColor: selected ? colors.secondary : colors.surfaceContainerLowest,
     borderRadius: variant === 'pill' ? Radii.full : Radii.md,
-    paddingVertical: Spacing.xs + 2,
+    paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
-    borderWidth: selected ? 1.5 : 0,
-    borderColor: selected ? colors.primary : 'transparent',
+    borderWidth: 1,
+    borderColor: selected ? colors.secondary : colors.outlineVariant,
   };
 
   const content = (
     <Text
       style={[
-        Typography.labelSm,
-        { color: colors.onPrimaryContainer },
+        styles.label,
+        { color: selected ? colors.onSecondary : colors.text },
       ]}
     >
       {label}
@@ -67,6 +58,7 @@ export function SChip({
         onPress={onPress}
         style={[styles.base, containerStyle, style]}
         accessibilityRole="button"
+        accessibilityState={{ selected }}
       >
         {content}
       </Pressable>
@@ -85,5 +77,11 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  label: {
+    ...Typography.labelMd,
+    textTransform: 'none',
+    letterSpacing: 0,
+    fontSize: 13,
   },
 });

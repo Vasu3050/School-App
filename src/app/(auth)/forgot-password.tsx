@@ -1,12 +1,23 @@
 /**
- * Sanskriti Pre School — Register Screen
+ * Sanskriti Pre School — Forgot Password Screen
  *
- * iOS-style glass aesthetic matching login. Top nav bar with brand
- * and theme toggle. Role tabs (parent/teacher) via SSegmentedControl.
+ * Matches the iOS-style glass aesthetic of login/register. Resets a password
+ * via PATCH /users/forgot-password (email + phone + newPassword).
+ *
+ * The user must also confirm their account type (parent/teacher/admin)
+ * because login requires a role; the forgot-password flow helps them
+ * remember which portal to return to.
  */
 
 import React, { useState } from 'react';
-import { StyleSheet, View, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
@@ -25,68 +36,60 @@ import { ScreenHeader } from '@/components/ScreenHeader';
 const ROLE_OPTIONS = [
   { value: 'parent' as const, label: 'Parent' },
   { value: 'teacher' as const, label: 'Teacher' },
+  { value: 'admin' as const, label: 'Admin' },
 ];
 
-export default function RegisterScreen() {
-  const { register } = useAuth();
+export default function ForgotPasswordScreen() {
+  const { forgotPassword } = useAuth();
   const colors = useThemeColors();
   const router = useRouter();
 
-  const [role, setRole] = useState<'parent' | 'teacher'>('parent');
-  const [name, setName] = useState('');
+  const [role, setRole] = useState<'parent' | 'teacher' | 'admin'>('parent');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
-  const [sid, setSid] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const [errors, setErrors] = useState<{
-    name?: string;
     email?: string;
     phone?: string;
-    password?: string;
-    sid?: string;
+    newPassword?: string;
+    confirmPassword?: string;
   }>({});
 
   const validate = () => {
-    const newErrors: typeof errors = {};
-    if (!name.trim()) newErrors.name = 'Full name is required';
-    if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) newErrors.email = 'Valid email is required';
-    if (!phone.trim() || !/^\d{10}$/.test(phone.trim())) newErrors.phone = '10-digit phone number is required';
-    if (!password || password.length < 6) newErrors.password = 'Password must be at least 6 characters';
-    if (role === 'parent' && !sid.trim()) newErrors.sid = 'Student ID (SID) is required for parents';
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    const e: typeof errors = {};
+    if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) {
+      e.email = 'Valid email is required';
+    }
+    if (!phone.trim() || !/^\d{10}$/.test(phone.trim())) {
+      e.phone = '10-digit phone is required';
+    }
+    if (!newPassword || newPassword.length < 6) {
+      e.newPassword = 'New password must be at least 6 characters';
+    }
+    if (newPassword !== confirmPassword) {
+      e.confirmPassword = 'Passwords do not match';
+    }
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
-  const handleRegister = async () => {
+  const handleReset = async () => {
     if (!validate()) return;
     setLoading(true);
-
     try {
-      const payload = {
-        name: name.trim(),
-        email: email.trim().toLowerCase(),
-        phone: phone.trim(),
-        password,
-        role,
-        ...(role === 'parent' ? { sid: sid.trim().toLowerCase() } : {}),
-      };
-
-      const response = await register(payload);
-
-      if (response?.success) {
-        Alert.alert(
-          'Registration Success',
-          'Your account has been created successfully. You can now log in.',
-          [{ text: 'Go to Login', onPress: () => router.replace('/(auth)/login') }]
-        );
-      }
-    } catch (error: any) {
+      await forgotPassword(email, phone, newPassword);
       Alert.alert(
-        'Registration Failed',
-        error.message || 'An error occurred during registration. Please try again.'
+        'Password Reset',
+        'Your password has been reset successfully. You can now sign in.',
+        [{ text: 'Go to Sign In', onPress: () => router.replace('/(auth)/login') }]
+      );
+    } catch (err: any) {
+      Alert.alert(
+        'Reset Failed',
+        err?.message || 'Could not reset password. Please check your details.'
       );
     } finally {
       setLoading(false);
@@ -99,7 +102,7 @@ export default function RegisterScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.flex}
       >
-        <ScreenHeader showBack compact title="Create Account" />
+        <ScreenHeader showBack compact />
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
@@ -110,44 +113,35 @@ export default function RegisterScreen() {
               <Image source={LogoPath} style={styles.logo} contentFit="contain" />
             </GlassSurface>
             <SText variant="headlineLgMobile" style={[styles.title, { color: colors.text }]}>
-              Join Sanskriti Pre School
+              Reset Password
+            </SText>
+            <SText
+              variant="bodyMd"
+              style={{ color: colors.textSecondary, textAlign: 'center' }}
+            >
+              Verify your account with email and phone, then choose a new password.
             </SText>
           </Animated.View>
 
           <Animated.View entering={FadeInDown.duration(600).delay(200)}>
             <GlassSurface style={styles.formCard}>
               <SText variant="labelSm" style={{ color: colors.textSecondary, marginBottom: Spacing.sm }}>
-                Register As
+                Account Type
               </SText>
               <SSegmentedControl
                 options={ROLE_OPTIONS}
                 value={role}
-                onChange={(r) => {
-                  setRole(r);
-                  setErrors((prev) => ({ ...prev, sid: undefined }));
-                }}
+                onChange={setRole}
                 style={styles.roleSelector}
-              />
-
-              <SInput
-                label="Full Name"
-                placeholder="Enter your name"
-                value={name}
-                onChangeText={(text) => {
-                  setName(text);
-                  if (errors.name) setErrors((prev) => ({ ...prev, name: undefined }));
-                }}
-                error={errors.name}
-                containerStyle={styles.inputSpacing}
               />
 
               <SInput
                 label="Email Address"
                 placeholder="example@mail.com"
                 value={email}
-                onChangeText={(text) => {
-                  setEmail(text);
-                  if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }));
+                onChangeText={(t) => {
+                  setEmail(t);
+                  if (errors.email) setErrors((p) => ({ ...p, email: undefined }));
                 }}
                 error={errors.email}
                 keyboardType="email-address"
@@ -159,58 +153,57 @@ export default function RegisterScreen() {
                 label="Phone Number"
                 placeholder="10-digit mobile number"
                 value={phone}
-                onChangeText={(text) => {
-                  setPhone(text);
-                  if (errors.phone) setErrors((prev) => ({ ...prev, phone: undefined }));
+                onChangeText={(t) => {
+                  setPhone(t);
+                  if (errors.phone) setErrors((p) => ({ ...p, phone: undefined }));
                 }}
                 error={errors.phone}
                 keyboardType="phone-pad"
                 containerStyle={styles.inputSpacing}
               />
 
-              {role === 'parent' && (
-                <SInput
-                  label="Student ID (SID)"
-                  placeholder="e.g. sid01"
-                  value={sid}
-                  onChangeText={(text) => {
-                    setSid(text);
-                    if (errors.sid) setErrors((prev) => ({ ...prev, sid: undefined }));
-                  }}
-                  error={errors.sid}
-                  autoCapitalize="none"
-                  containerStyle={styles.inputSpacing}
-                  helperText="Ask the administrator for your child's student ID."
-                />
-              )}
+              <SInput
+                label="New Password"
+                placeholder="At least 6 characters"
+                value={newPassword}
+                onChangeText={(t) => {
+                  setNewPassword(t);
+                  if (errors.newPassword) setErrors((p) => ({ ...p, newPassword: undefined }));
+                }}
+                error={errors.newPassword}
+                secureTextEntry
+                autoCapitalize="none"
+                containerStyle={styles.inputSpacing}
+              />
 
               <SInput
-                label="Password"
-                placeholder="At least 6 characters"
-                value={password}
-                onChangeText={(text) => {
-                  setPassword(text);
-                  if (errors.password) setErrors((prev) => ({ ...prev, password: undefined }));
+                label="Confirm New Password"
+                placeholder="Re-enter the new password"
+                value={confirmPassword}
+                onChangeText={(t) => {
+                  setConfirmPassword(t);
+                  if (errors.confirmPassword)
+                    setErrors((p) => ({ ...p, confirmPassword: undefined }));
                 }}
-                error={errors.password}
+                error={errors.confirmPassword}
                 secureTextEntry
                 autoCapitalize="none"
                 containerStyle={styles.inputSpacing}
               />
 
               <SButton
-                title="Create Account"
-                onPress={handleRegister}
+                title="Reset Password"
+                onPress={handleReset}
                 loading={loading}
-                style={styles.registerButton}
+                style={styles.submitButton}
               />
 
-              <View style={styles.loginPrompt}>
+              <View style={styles.backRow}>
                 <SText variant="bodySm" style={{ color: colors.textSecondary }}>
-                  Already have an account?{' '}
+                  Remembered it?{' '}
                 </SText>
                 <SButton
-                  title="Sign In"
+                  title="Back to Sign In"
                   variant="ghost"
                   size="sm"
                   onPress={() => router.replace('/(auth)/login')}
@@ -231,11 +224,12 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     padding: Spacing.xl,
-    paddingTop: Spacing.md,
+    paddingTop: Spacing.lg,
   },
   header: {
     alignItems: 'center',
     marginBottom: Spacing['2xl'],
+    gap: Spacing.xs,
   },
   logoFrame: {
     padding: Spacing.md,
@@ -243,8 +237,8 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   logo: {
-    width: 80,
-    height: 80,
+    width: 72,
+    height: 72,
   },
   title: {
     textAlign: 'center',
@@ -260,11 +254,11 @@ const styles = StyleSheet.create({
   inputSpacing: {
     marginBottom: Spacing.lg,
   },
-  registerButton: {
-    marginTop: Spacing.md,
+  submitButton: {
     width: '100%',
+    marginTop: Spacing.md,
   },
-  loginPrompt: {
+  backRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',

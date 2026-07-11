@@ -112,6 +112,15 @@ export const Colors = {
     tabIconDefault: '#7F7663',
     tabIconSelected: '#745B00',
 
+    // Glass / iOS-style surfaces
+    glassBackground: 'rgba(255, 255, 255, 0.78)',
+    glassBorder: 'rgba(117, 88, 67, 0.14)',
+    glassTint: 'rgba(255, 248, 243, 0.45)',
+    segmentTrack: 'rgba(74, 50, 31, 0.06)',
+    segmentSelected: '#FFFFFF',
+    blobPrimary: 'rgba(242, 201, 76, 0.38)',
+    blobSecondary: 'rgba(117, 88, 67, 0.16)',
+
     // Legacy aliases for template compatibility
     /** @deprecated */ backgroundElement: '#F4ECE6',
     /** @deprecated */ backgroundSelected: '#EFE7E0',
@@ -195,6 +204,15 @@ export const Colors = {
     tabBarBorder: '#38352F',
     tabIconDefault: '#9C937F',
     tabIconSelected: '#EBC246',
+
+    // Glass / iOS-style surfaces
+    glassBackground: 'rgba(35, 32, 27, 0.82)',
+    glassBorder: 'rgba(255, 255, 255, 0.12)',
+    glassTint: 'rgba(22, 19, 15, 0.55)',
+    segmentTrack: 'rgba(255, 255, 255, 0.05)',
+    segmentSelected: 'rgba(255, 255, 255, 0.12)',
+    blobPrimary: 'rgba(235, 194, 70, 0.24)',
+    blobSecondary: 'rgba(229, 191, 165, 0.10)',
 
     // Legacy aliases for template compatibility
     /** @deprecated */ backgroundElement: '#23201B',

@@ -28,6 +28,7 @@ import Animated, {
 import { useThemeColors } from '@/hooks/use-theme';
 import { Spacing, Radii, Elevation } from '@/constants/theme';
 import { Springs, ScaleFeedback } from '@/constants/animations';
+import { GlassSurface } from '@/components/ui/GlassSurface';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -41,6 +42,8 @@ interface SCardProps {
   style?: ViewStyle;
   /** Remove shadow for flat cards in lists */
   flat?: boolean;
+  /** Frosted glass card (iOS-style) */
+  glass?: boolean;
 }
 
 export function SCard({
@@ -49,6 +52,7 @@ export function SCard({
   compact = false,
   style,
   flat = false,
+  glass = false,
 }: SCardProps) {
   const colors = useThemeColors();
   const scale = useSharedValue(1);
@@ -71,14 +75,42 @@ export function SCard({
 
   const cardStyle: ViewStyle[] = [
     styles.card,
-    {
+    !glass && {
       backgroundColor: colors.card,
       borderColor: colors.cardBorder,
+    },
+    glass && {
+      backgroundColor: 'transparent',
+      borderColor: colors.glassBorder,
+    },
+    {
       padding: compact ? Spacing['2xl'] : Spacing['3xl'],
     },
-    !flat && Elevation.sm,
+    !flat && !glass && Elevation.sm,
     style,
   ].filter(Boolean) as ViewStyle[];
+
+  if (glass) {
+    return (
+      <Animated.View style={onPress ? animatedStyle : undefined}>
+        <GlassSurface style={cardStyle}>
+          {onPress ? (
+            <AnimatedPressable
+              onPress={onPress}
+              onPressIn={handlePressIn}
+              onPressOut={handlePressOut}
+              style={styles.glassInner}
+              accessibilityRole="button"
+            >
+              {children}
+            </AnimatedPressable>
+          ) : (
+            children
+          )}
+        </GlassSurface>
+      </Animated.View>
+    );
+  }
 
   if (onPress) {
     return (
@@ -99,8 +131,11 @@ export function SCard({
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: Radii.xl,  // 16px per DESIGN.md
+    borderRadius: Radii.xl,
     borderWidth: 1,
     overflow: 'hidden',
+  },
+  glassInner: {
+    flex: 1,
   },
 });
